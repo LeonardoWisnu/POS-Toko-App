@@ -11,7 +11,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
 
-    <!-- SHEETJS (Untuk Export Excel Offline) -->
+    <!-- SHEETJS (Untuk Export & Import Excel Offline) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <script>
@@ -37,7 +37,6 @@
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<!-- FIXED INSET-0: Mengunci layar agar terasa seperti aplikasi Native dan menu bawah tidak terhalang -->
 <body class="bg-appBg font-sans text-gray-800 fixed inset-0 flex flex-col overflow-hidden">
 
     <!-- ================= HALAMAN LOGIN ================= -->
@@ -95,7 +94,7 @@
 
         <div class="flex flex-1 overflow-hidden">
             
-            <!-- SIDEBAR NAVIGASI (Hanya tampil di Desktop & Tablet) -->
+            <!-- SIDEBAR NAVIGASI (Desktop & Tablet) -->
             <aside class="hidden md:flex flex-col w-64 bg-white border-r border-gray-200 h-full py-6 flex-shrink-0">
                 <nav class="flex flex-col gap-2 px-4 flex-1">
                     <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 px-2">Menu Utama</p>
@@ -122,14 +121,10 @@
             </aside>
 
             <!-- KONTEN DINAMIS UTAMA -->
-            <!-- pb-20 md:pb-6 memastikan area bawah memiliki ruang kosong agar tidak tertutup nav bar melayang di HP -->
             <main class="flex-1 overflow-y-auto bg-appBg p-3 md:p-6 w-full relative pb-20 md:pb-6">
                 
                 <!-- ================= 1. KASIR (POINT OF SALE) ================= -->
-                <!-- Di HP, barang dan cart dibagi persentase tingginya agar muat 1 layar -->
                 <div id="sec-kasir" class="content-section block h-full flex flex-col md:flex-row gap-3 md:gap-4">
-                    
-                    <!-- Kiri: Daftar Barang -->
                     <div class="flex-1 flex flex-col bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden h-[45vh] md:h-auto">
                         <div class="p-3 border-b border-gray-100 bg-gray-50 md:bg-white z-10 shrink-0">
                             <div class="relative">
@@ -138,14 +133,12 @@
                             </div>
                         </div>
                         <div class="flex-1 p-3 overflow-y-auto hide-scrollbar bg-gray-50 md:bg-white">
-                            <!-- PERBAIKAN: grid-cols-1 di HP agar luas, dan memanjang otomatis di tablet/desktop -->
                             <div id="grid-pos-barang" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-                                <!-- Render Barang Kasir -->
+                                <!-- Render Barang -->
                             </div>
                         </div>
                     </div>
 
-                    <!-- Kanan: Keranjang Belanja -->
                     <div class="w-full md:w-80 lg:w-96 bg-white rounded-2xl shadow-sm border border-gray-200 flex flex-col shrink-0 h-[40vh] md:h-full">
                         <div class="p-3 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl shrink-0">
                             <h3 class="font-bold text-brandDark text-sm"><i class="fas fa-shopping-cart mr-2 text-brandPrimary"></i> Keranjang</h3>
@@ -171,7 +164,6 @@
                 <!-- ================= 2. DASHBOARD ================= -->
                 <div id="sec-dashboard" class="content-section hidden space-y-5 md:space-y-6">
                     <h2 class="text-xl md:text-2xl font-bold text-brandDark">Ringkasan Hari Ini</h2>
-                    
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-6">
                         <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-200 flex items-center gap-4">
                             <div class="w-12 h-12 rounded-full bg-indigo-50 text-brandPrimary flex items-center justify-center text-xl"><i class="fas fa-wallet"></i></div>
@@ -202,11 +194,17 @@
                     <div class="bg-white rounded-2xl p-4 md:p-6 shadow-sm border border-gray-200">
                         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-5 md:mb-6 gap-3">
                             <h2 class="text-lg md:text-xl font-bold text-brandDark">Database Barang</h2>
-                            <!-- FITUR EXPORT EXCEL -->
-                            <div class="flex w-full sm:w-auto gap-2">
-                                <button onclick="exportInventarisExcel()" class="flex-1 sm:flex-none bg-green-600 text-white px-3 md:px-4 py-2.5 rounded-xl font-bold hover:bg-green-700 transition text-xs md:text-sm flex items-center justify-center gap-2 shadow-sm">
-                                    <i class="fas fa-file-excel"></i> Export Excel
+                            <div class="flex flex-wrap w-full sm:w-auto gap-2">
+                                <!-- IMPORT EXCEL -->
+                                <input type="file" id="file-import-excel" class="hidden" accept=".xlsx, .xls, .csv" onchange="prosesImportExcel(event)">
+                                <button onclick="document.getElementById('file-import-excel').click()" class="flex-1 sm:flex-none bg-blue-600 text-white px-3 md:px-4 py-2.5 rounded-xl font-bold hover:bg-blue-700 transition text-xs md:text-sm flex items-center justify-center gap-2 shadow-sm">
+                                    <i class="fas fa-file-import"></i> Import
                                 </button>
+                                <!-- EXPORT EXCEL -->
+                                <button onclick="exportInventarisExcel()" class="flex-1 sm:flex-none bg-green-600 text-white px-3 md:px-4 py-2.5 rounded-xl font-bold hover:bg-green-700 transition text-xs md:text-sm flex items-center justify-center gap-2 shadow-sm">
+                                    <i class="fas fa-file-excel"></i> Export
+                                </button>
+                                <!-- TAMBAH MANUAL -->
                                 <button onclick="openModalBarang()" class="flex-1 sm:flex-none bg-brandDark text-white px-3 md:px-4 py-2.5 rounded-xl font-bold hover:bg-black transition text-xs md:text-sm flex items-center justify-center gap-2 shadow-sm">
                                     <i class="fas fa-plus"></i> Tambah
                                 </button>
@@ -228,7 +226,6 @@
                     <div class="bg-white rounded-2xl p-4 md:p-6 shadow-sm border border-gray-200">
                         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-5 md:mb-6 gap-3">
                             <h2 class="text-lg md:text-xl font-bold text-brandDark">Laporan Penjualan</h2>
-                            <!-- FITUR EXPORT EXCEL TRANSAKSI -->
                             <button onclick="exportRiwayatExcel()" class="w-full sm:w-auto bg-green-600 text-white px-4 py-2.5 rounded-xl font-bold hover:bg-green-700 transition text-xs md:text-sm flex items-center justify-center gap-2 shadow-sm">
                                 <i class="fas fa-file-excel text-base"></i> Download Excel
                             </button>
@@ -267,7 +264,7 @@
             </main>
         </div>
 
-        <!-- MOBILE BOTTOM NAV (Posisi absolut/fixed menempel kuat di layar bawah HP) -->
+        <!-- MOBILE BOTTOM NAV -->
         <nav class="md:hidden absolute bottom-0 left-0 w-full bg-white border-t border-gray-200 flex justify-around p-2 z-[90] shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
             <button onclick="changeMenu('kasir')" id="nav-mob-kasir" class="mob-nav-btn flex-1 flex flex-col items-center p-2 text-brandPrimary transition">
                 <i class="fas fa-calculator text-lg mb-1"></i><span class="text-[9px] font-bold">Kasir</span>
@@ -351,7 +348,7 @@
         </div>
     </div>
 
-    <!-- ================= JAVASCRIPT: LOGIKA POS & FIREBASE ================= -->
+    <!-- ================= JAVASCRIPT ================= -->
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyBDBfVdpDACXFMoxiuYSSUj8WAvHBAXs4w",
@@ -471,7 +468,7 @@
 
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
-        // --- INVENTORY ---
+        // --- INVENTORY CRUD ---
         function openModalBarang() { document.getElementById('modal-add-barang').classList.remove('hidden'); }
         function simpanBarang() {
             let k = document.getElementById('inp-brg-kode').value.toUpperCase(), n = document.getElementById('inp-brg-nama').value;
@@ -496,7 +493,6 @@
                 let btnDisable = b.stok <= 0 ? 'opacity-50 cursor-not-allowed grayscale' : 'cursor-pointer hover:border-brandPrimary hover:shadow-md';
                 let onclick = b.stok <= 0 ? '' : `onclick="tambahKeKeranjang('${b.fbKey}', '${b.nama}', ${b.harga}, ${b.stok})"`;
                 
-                // SATU KOLOM KHUSUS HP (grid-cols-1) yang memanjang ke bawah dengan flex-row
                 html += `
                     <div ${onclick} class="bg-white rounded-xl p-3 md:p-4 border border-gray-200 ${btnDisable} transition flex flex-row sm:flex-col justify-between items-center sm:items-start gap-3 shadow-sm">
                         <div class="flex-1 w-full min-w-0">
@@ -678,39 +674,67 @@
         }
         function hapusPegawai(userKey) { if(confirm(`Cabut akses untuk @${userKey}?`)) db.ref('pos_users/' + userKey).remove(); }
 
-        // ================= FITUR EXCEL EXPORT (SHEETJS) =================
+        // ================= FITUR EXCEL (EXPORT & IMPORT) =================
         function exportRiwayatExcel() {
-            if(dbTransaksi.length === 0) return alert("Belum ada data transaksi untuk diekspor!");
+            if(dbTransaksi.length === 0) return alert("Belum ada data transaksi!");
             let data = dbTransaksi.map(t => ({
-                "ID Transaksi": t.id,
-                "Tanggal": t.tgl,
-                "Waktu": t.waktu,
-                "Kasir": t.kasir,
-                "Total Belanja (Rp)": t.total,
-                "Pembayaran Tunai (Rp)": t.bayar,
-                "Kembalian (Rp)": t.kembali,
+                "ID Transaksi": t.id, "Tanggal": t.tgl, "Waktu": t.waktu, "Kasir": t.kasir,
+                "Total Belanja (Rp)": t.total, "Pembayaran Tunai (Rp)": t.bayar, "Kembalian (Rp)": t.kembali,
                 "Daftar Item Terjual": t.items ? t.items.map(i => `${i.nama} (x${i.qty})`).join(', ') : ''
             }));
-            let worksheet = XLSX.utils.json_to_sheet(data);
-            let workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Laporan Penjualan");
-            let fileName = `Laporan_Transaksi_${new Date().toLocaleDateString('id-ID').replace(/\//g,'-')}.xlsx`;
-            XLSX.writeFile(workbook, fileName);
+            let ws = XLSX.utils.json_to_sheet(data);
+            let wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Laporan Penjualan");
+            XLSX.writeFile(wb, `Laporan_Transaksi_${new Date().toLocaleDateString('id-ID').replace(/\//g,'-')}.xlsx`);
         }
 
         function exportInventarisExcel() {
-            if(dbBarang.length === 0) return alert("Belum ada data barang untuk dibackup!");
+            if(dbBarang.length === 0) return alert("Belum ada data barang!");
             let data = dbBarang.map(b => ({
-                "Kode / SKU": b.kode,
-                "Nama Produk": b.nama,
-                "Sisa Stok Saat Ini": b.stok,
-                "Harga Jual (Rp)": b.harga
+                "Kode / SKU": b.kode, "Nama Produk": b.nama, "Sisa Stok Saat Ini": b.stok, "Harga Jual (Rp)": b.harga
             }));
-            let worksheet = XLSX.utils.json_to_sheet(data);
-            let workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Database Barang");
-            let fileName = `Backup_Inventaris_${new Date().toLocaleDateString('id-ID').replace(/\//g,'-')}.xlsx`;
-            XLSX.writeFile(workbook, fileName);
+            let ws = XLSX.utils.json_to_sheet(data);
+            let wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Database Barang");
+            XLSX.writeFile(wb, `Backup_Inventaris_${new Date().toLocaleDateString('id-ID').replace(/\//g,'-')}.xlsx`);
+        }
+
+        function prosesImportExcel(event) {
+            let file = event.target.files[0];
+            if (!file) return;
+
+            let reader = new FileReader();
+            reader.onload = function(e) {
+                let data = new Uint8Array(e.target.result);
+                let workbook = XLSX.read(data, {type: 'array'});
+                let firstSheet = workbook.SheetNames[0];
+                let elements = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheet]);
+
+                if(elements.length === 0) return alert("File Excel kosong atau format tidak sesuai!");
+                
+                if(confirm(`Ditemukan ${elements.length} data barang. Mulai import ke database?`)) {
+                    let successCount = 0;
+                    elements.forEach(row => {
+                        let kode = row['Kode / SKU'] || row['Kode'] || row['SKU'] || row['Barcode'];
+                        let nama = row['Nama Produk'] || row['Nama'] || row['Item'];
+                        let stok = row['Sisa Stok Saat Ini'] || row['Stok'] || row['Qty'];
+                        let harga = row['Harga Jual (Rp)'] || row['Harga Jual'] || row['Harga'];
+
+                        if(kode && nama) {
+                            db.ref('pos_barang').push({
+                                kode: String(kode).toUpperCase(),
+                                nama: String(nama),
+                                stok: parseInt(stok) || 0,
+                                harga: parseInt(harga) || 0
+                            });
+                            successCount++;
+                        }
+                    });
+                    alert(`${successCount} barang berhasil diimport!`);
+                }
+                event.target.value = ''; 
+            };
+            reader.readAsArrayBuffer(file);
         }
     </script>
 </body>
